@@ -5,6 +5,8 @@
 #include <termios.h>
 #include <unistd.h>
 
+#define CTRL_KEY(k) ((k) & 0x1f)
+
 struct termios termios_struct;
 
 void die(const char *s) {
@@ -17,7 +19,7 @@ void disableRawMode() {
     die("tcsetattr");
 }
 
-void enableRawMode(){
+void enableRawMode() {
 	if (tcgetattr(STDIN_FILENO, &termios_struct) == -1) die("tcgetattr");
 	atexit(disableRawMode);
 
@@ -31,17 +33,25 @@ void enableRawMode(){
 	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &copy_struct) == -1) die ("tcsetattr");
 }
 
+char readKeyPressed() {
+  char c = '\0';
+  if (read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN) die("read");
+  return c;
+}
+
+void handleOperations(char c) {
+  if (iscntrl(c)) {
+    printf("%d\r\n", c);
+  } else {
+    printf("%d ('%c')\r\n", c, c);
+  }
+  if (c == CTRL_KEY('q')) exit(0);
+}
+
 int main() {
 	enableRawMode();
   while (true) {
-    char c = '\0';
-    if (read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN) die("read");
-    if (iscntrl(c)) {
-      printf("%d\r\n", c);
-    } else {
-      printf("%d ('%c')\r\n", c, c);
-    }
-    if (c == 'q') break;
+    handleOperations(readKeyPressed());
   }
 	return 0;
 }
