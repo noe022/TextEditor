@@ -8,25 +8,21 @@
 # @email alu0101710228@ull.edu.es
 # @brief A Makefile template
 
-CXX = g++
-CXXFLAGS = -std=c++17 -Wall
+CC = gcc
+CFLAGS = -std=c11 -Wall
 LDFLAGS =
 
 TARGET = kilo
-SRCS = kilo.cc
-OBJS = $(SRCS:.cc=.o)
+SRCS = kilo.c
+OBJS = $(SRCS:.c=.o)
 
 all: $(TARGET)
-$(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
-%.o: %.cc
-	$(CXX) $(CXXFLAGS) -c $<
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 run: $(TARGET)
 	./$(TARGET)
 
-clean :
-	rm -f $(OBJS) $(TARGET) *.d *~ a.out
-
--include $(OBJS:.o=.d)
+clean:
+	rm -f $(OBJS) $(TARGET) *~ a.out
